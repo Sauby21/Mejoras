@@ -7,7 +7,9 @@ def crear_app():
     app = Flask(__name__)
     #CARGAR CONFIGURACION
     app.config.from_object(Config)
-    #BLUEPRINTS
+    
+   
+    #BLUEPRINTS    
     from routes import login
     app.register_blueprint(login.bp)
     

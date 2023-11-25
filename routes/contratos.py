@@ -1,20 +1,24 @@
-from flask import Blueprint,render_template, request, redirect, url_for, flash, session, make_response
-
-from models.tipoPredio import TipoPredio
+from flask import Blueprint,render_template, request, redirect, url_for, flash, session, make_response, jsonify
+from flask_mail import Mail, Message
+from utils.mail import mail_instance
+from flask import render_template
+from models.tipo_predio import TipoPredio
 from models.ubigeo import Ubigeo
 from models.predio import Predio
 from models.area_comun import Area_Comun
 from models.predio_area_comun import Predio_Area_Comun
 from models.servicio import Servicio
-from models.solicitudCotizacion import SolicitudCotizacion
+from models.solicitud_cotizacion import SolicitudCotizacion
 from models.solicitud import Solicitud
 from models.rol import Rol
-from models.tipoDocumento import TipoDocumento
+from models.tipo_documento import TipoDocumento
 from models.persona import Persona
 from models.personal import Personal
 from models.solicitante import Solicitante
 from models.contrato import Contrato
 from datetime import datetime
+from schema.contrato_schema import contrato_schema
+
 
 from jinja2 import Environment, FileSystemLoader
 import pdfkit
@@ -66,6 +70,7 @@ def contratos(tipo,id):
             Contrato.fecha_contrato != None,
             Contrato.fecha_firma_solicitante != None,
             Contrato.fecha_firma_personal != None,
+          
             Contrato.fecha_registro != None,
         ).all()
     else:
@@ -114,7 +119,7 @@ def crear_contrato(tipo,id,id_solicitud_cotizacion):
     contrato = Contrato(id_solicitud_cotizacion,
                         id_personal,
                         id_solicitante,
-                        fecha_actual_str, 
+                        fecha_actual_str,
                         None,
                         None,
                         None,
@@ -122,18 +127,37 @@ def crear_contrato(tipo,id,id_solicitud_cotizacion):
     db.session.add(contrato)
     db.session.commit()
     
+
     
-    contrato_final = Contrato.query.filter(
-        Contrato.id_solicitud_cotizacion == id_solicitud_cotizacion,
-        Contrato.id_personal == id_personal,
-        Contrato.id_solicitante == id_solicitante
-    ).all()
-    
-    id_contrato = contrato_final[0].id_contrato
-    
-    crear_carpeta_contratos(id_contrato,id_solicitud_cotizacion,id_personal,id_solicitante)
-    
-    return redirect(url_for('routes.contratos', id=id, tipo = tipo))
+    resultado = contrato_schema.dump(contrato)
+    data = {
+        'message': 'Nuevo contrato agregado',
+        'status:': 201,
+        'data': resultado
+    }
+
+    # Devuelve la respuesta JSON
+    response = make_response(jsonify(data), 201)
+
+    # Realiza la redirección solo si la solicitud es de tipo 'GET'
+    if request.method == 'GET':
+        contrato_final = Contrato.query.filter(
+            Contrato.id_solicitud_cotizacion == id_solicitud_cotizacion,
+            Contrato.id_personal == id_personal,
+            Contrato.id_solicitante == id_solicitante
+        ).all()
+
+        id_contrato = contrato_final[0].id_contrato
+
+        crear_carpeta_contratos(id_contrato, id_solicitud_cotizacion, id_personal, id_solicitante)
+
+        # Redirige al usuario
+        print(f"holayhdhydh{redirect(url_for('routes.contratos', id=id, tipo=tipo))}") 
+        return redirect(url_for('routes.contratos', id=id, tipo=tipo))
+
+    # Devuelve la respuesta JSON si la solicitud no es de tipo 'GET'
+    return response
+  
 
 
 def crear_carpeta_contratos(id_contrato,id_solicitud_cotizacion,id_personal,id_solicitante):
@@ -181,13 +205,22 @@ def firmar_contrato(tipo,id,id_contrato,referencia):
     else:
         contrato.fecha_firma_personal = fecha_actual  
         contrato.fecha_registro = fecha_actual 
-        generar_pdf (id_contrato,tipo,referencia) 
-
-    db.session.commit()
+        # generar_pdf (id_contrato,tipo,referencia) 
     
+    db.session.commit()
+
+    correo_usuario = session.get('correo_usuario')
+    msg = Message('Contrato Firmado', sender='CondosaCondominios@gmail.com', recipients=[correo_usuario])
+    # Renderizar la plantilla con los datos necesarios
+
+
+    # Renderizar la plantilla con los datos necesarios
+    msg.html = render_template('email.html')
+
+    mail_instance.send(msg)  # Aquí utilizamos mail_instance en lugar de mail
     flash("CONTRADO FIRMADO CORRECTAMENTE!!!")
     
-    return redirect(url_for('routes.contratos', tipo = tipo, id = id)) 
+    return redirect(url_for('routes.contratos', tipo = tipo, id = id))
 
 
 def obtener_datos_contrato(id_contrato):

@@ -1,5 +1,16 @@
 from dotenv import load_dotenv
+
 import os
+load_dotenv()
+
+user = os.environ["USER"]
+password = os.environ["PASSWORD"]
+host = os.environ["HOST"]
+database = os.environ["DATABASE"]
+server = os.environ["SERVER"]
+
+DATABASE_CONNECTION_URI = f'{server}://{user}:{password}@{host}/{database}'
+print(DATABASE_CONNECTION_URI)
 
 def getURI():
     #CARGA LAS VARIABLES DE ENTORNO DEL .env
@@ -18,6 +29,7 @@ def getURI():
 
 class Config:
     SECRET_KEY = 'my-secret-key'
+
     DEBUG = True
     # Configuramos la base de datos que vamos a utilizar para nuestra aplicación
     SQLALCHEMY_DATABASE_URI = getURI()

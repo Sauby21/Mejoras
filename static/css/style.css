@@ -6,7 +6,7 @@
 	font-family: 'Open Sans', sans-serif;
 }
 .fondo {
-	background: url(https://www.xtrafondos.com/descargar.php?id=3183&resolucion=3840x1633);
+	background-image: url(../img/fondo-desenfoque.png);
 	background-size: 100vw 100vh;
 	background-repeat: no-repeat;
 	width: 100%;
@@ -16,10 +16,10 @@
 	height: 100vh;
 	position: fixed;
 	z-index: -1;
-	filter: brightness(0.7); /* Ajusta el valor para cambiar el brillo */
+	filter: brightness(1); /* Ajusta el valor para cambiar el brillo */
 }
 .skewed {
-	border-top: 1px solid #fff;
+	border-top: 1px solid black;
 	height: 2px;
 	max-width: 95%;
 	padding: 0;
@@ -27,7 +27,7 @@
 }
 
 footer {
-	color: white;
+	color: black;
 	font-size: 15px;
 	height: 45px;
 	width: 100%;

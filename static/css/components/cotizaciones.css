@@ -42,7 +42,7 @@
 .titulo {
   text-align: center;
   font-size: 36px;
-  color: #fff;
+  color: black;
 }
 
 /* Estilos para las pestañas */
@@ -59,8 +59,8 @@
 .option-active {
   background: var(--bg-active);
   border-bottom: 1px solid rgba(7, 63, 95, 0.4);
-  border-bottom-color: white !important;
-  color: #fff !important;
+  border-bottom-color: black !important;
+  color: black !important;
 }
 
 .tabs {
@@ -82,7 +82,7 @@
 #pendientes-tab,
 #completadas-tab {
   border-bottom-color: #000;
-  color: #fff;
+  color: black;
   transition: border-color 0.3s ease-in-out;
 }
 
